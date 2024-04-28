@@ -1,0 +1,55 @@
+clc;clear all;close all;
+message=input("enter the message");
+msg=[];
+msg=[msg double(char(message))];
+disp("message")
+disp(msg);
+keyi=input("enter key")
+key=[];
+key=[key double(char(keyi))];
+s=[];
+T=[];
+for i=1:256
+    s(i)=i;
+    if length(T)<256
+        z=T;
+        T=[key T];
+    end
+end
+T=T(1,1:256);
+disp("state vector")
+disp(s);
+disp("temp vector")
+disp(T);
+j=0;
+for i=1:256
+    j=mod((j+s(i)+T(i)),256)+1;
+    s([i j])=s([j i]);
+end
+disp("permuted state ")
+disp(s);
+i=0;
+j=0;
+k=[];
+for i=1:length(msg)
+    i=mod(i+1,256);
+    j=mod(j+s(i),256);
+    s([i j])=s([j i]);
+    k=[k s(mod(s(i)+s(j),256))];
+end
+disp("secret key")
+disp(k);
+encrypted_msg=[];
+i=0;
+for i=1:length(msg)
+    encrypted_msg=[encrypted_msg bitxor(msg(i),k(i))];
+end 
+disp("encrypted")
+disp(char(encrypted_msg));
+i=0
+decrypted_msg=[];
+for i=1:length(msg)
+    decrypted_msg=[decrypted_msg bitxor(encrypted_msg(i),k(i))];
+end 
+disp("dec")
+disp(char(decrypted_msg));
