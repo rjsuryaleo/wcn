@@ -1,0 +1,62 @@
+clc; clear; close all;
+
+fs = 4000 ; f1 = 1000; f2 = 800;
+ts = 0:(1/fs):1-(1/fs);
+signal1 = 20*exp(complex(0,2*pi*f1*ts));
+signal2 = 20*exp(complex(0,2*pi*f2*ts));
+message = signal1+signal2;
+
+% Delay-Spread Signal
+
+delayed = [zeros(1,60),message(1:length(message)-60)];
+figure;
+subplot(2,1,1); plot(ts,message); title('MESSAGE SIGNAL');
+subplot(2,1,2); plot(ts,delayed); title('DELAYED SIGNAL');
+
+freqres = fft(message);
+figure;
+magnitudeplot = abs(freqres);
+plot(1:fs,magnitudeplot);
+title({'Input Signal';'Frequency Response'});xlabel('Frequency');ylabel('Amplitude');
+
+% Slow and Flat Fading
+h = randn + (1i*randn);
+y1 = message.*h;
+freqres = fft(y1);
+figure;
+magnitudeplot = abs(fft(y1));
+
+subplot(2,2,1);
+plot(1:fs,magnitudeplot(1:fs));
+title('Slow and Flat Fading'); xlabel('Frequency'); ylabel('Amplitude');
+
+
+% Slow and Frequency Selective Fading
+h1 = randn + (1i*randn); h2 = randn + (1i*randn);
+y2 = (h1.*message) + (h2.*delayed);
+magnitudeplot = abs(fft(y2));
+
+subplot(2,2,2);
+plot(1:fs,magnitudeplot);
+title('Slow and Frequency Selective Fading'); xlabel('Frequency'); ylabel('Amplitude');
+
+% Fast and Flat Fading
+fc = 10;
+hs = randn(1,length(ts)) +(1i*randn(1,length(ts)));
+[b,a] = butter(12,((2*fc)/1000));
+lpf = filter(b,a,hs);
+y3 = lpf.*message;
+magnitudeplot = abs(fft(y3));
+subplot(2,2,3);
+plot(1:fs,magnitudeplot);
+title('Fast and Flat Fading'); xlabel('Frequency'); ylabel('Amplitude');
+
+% Fast and Frequency Selective Fading
+ht = randn(1,length(ts)) +(1i*randn(1,length(ts)));
+lpf1 = filter(b,a,ht);
+trans4 = (lpf1.*message) +(lpf1.*delayed);
+magnitudeplot = abs(fft(trans4));
+
+subplot(2,2,4);
+plot(1:fs,magnitudeplot);
+title('Fast and Frequency Selective Fading'); xlabel('Frequency'); ylabel('Amplitude');
